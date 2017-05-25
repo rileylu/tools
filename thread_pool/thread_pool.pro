@@ -7,4 +7,7 @@ SOURCES += main.cpp
 
 HEADERS += \
     thread_pool.h \
-    threadsafe_queue.h
+    threadsafe_queue.h \
+    work_stealing_queue.h \
+    function_wrapper.h \
+    join_threads.h
