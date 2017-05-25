@@ -1,11 +1,12 @@
 TEMPLATE = app
-CONFIG += console c++11
+CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += main.cpp
 
 LIBS += -lpthread
+QMAKE_CXXFLAGS += -std=c++11
 
 HEADERS += \
     thread_pool.h \

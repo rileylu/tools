@@ -14,16 +14,29 @@
 class thread_pool
 {
     typedef function_wrapper task_type;
+    typedef std::vector<std::unique_ptr<work_stealing_queue>> queues_vector;
 
+    unsigned const thread_count;
     std::atomic_bool done;
     threadsafe_queue<task_type> pool_work_queue;
+    queues_vector const queues;
 
-    std::vector<std::unique_ptr<work_stealing_queue>> queues;
     std::vector<std::thread> threads;
     join_threads joiner;
 
     static thread_local work_stealing_queue* local_work_queue;
     static thread_local unsigned my_index;
+
+    queues_vector make_queues()
+    {
+        queues_vector queues;
+        queues.reserve(thread_count);
+        for(unsigned i=0;i<thread_count;++i)
+        {
+            queues.push_back(std::unique_ptr<work_stealing_queue>(new work_stealing_queue));
+        }
+        return queues;
+    }
 
     void worker_thread(unsigned my_index_)
     {
@@ -61,15 +74,16 @@ class thread_pool
 
 public:
     thread_pool() :
-        done(false), joiner(threads)
+        thread_count(std::thread::hardware_concurrency()),
+        done(false),
+        queues(make_queues()),
+        joiner(threads)
     {
         unsigned const thread_count = std::thread::hardware_concurrency();
         try
         {
             for (unsigned i = 0; i < thread_count; ++i)
             {
-                queues.push_back(std::unique_ptr<work_stealing_queue>(
-                                     new work_stealing_queue));
                 threads.push_back(std::thread(&thread_pool::worker_thread, this,i));
             }
         }
