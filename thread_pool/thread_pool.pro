@@ -5,6 +5,8 @@ CONFIG -= qt
 
 SOURCES += main.cpp
 
+LIBS += -lpthread
+
 HEADERS += \
     thread_pool.h \
     threadsafe_queue.h \
